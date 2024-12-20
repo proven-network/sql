@@ -1,0 +1,6 @@
+{
+  "name": "@proven-network/sql",
+  "version": "0.0.1",
+  "description": "Access relational data inside Proven runtime",
+  "main": "index.js"
+}
