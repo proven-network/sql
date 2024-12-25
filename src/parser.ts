@@ -34,6 +34,20 @@ type InitialCreateTableState = {
   currentColumns: CurrentColumn[];
 };
 
+type QueryState = {
+  currentDatabase: string;
+  currentTableName: string;
+  currentSelectColumns: string[];
+  currentJoinTables: string[];
+};
+
+type InitialQueryState = {
+  currentDatabase: never;
+  currentTableName: never;
+  currentSelectColumns: never;
+  currentJoinTables: never;
+};
+
 type AlterTableState = {
   currentDatabase: string;
   currentTableName: string;
@@ -280,5 +294,5 @@ type ParseMigration<
 type ParseQueryType<
   Tokens extends readonly any[],
   Schema extends GeneratedSchema = InitialGeneratedSchema,
-  State extends CreateTableState = InitialCreateTableState
+  State extends QueryState = InitialQueryState
 > = Tokens extends [infer First, ...infer Rest] ? any[] : any[];
