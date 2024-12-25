@@ -297,7 +297,11 @@ type ParseQueryType<
   State extends QueryState = InitialQueryState
 > = Tokens extends [infer First, ...infer Rest]
   ? First extends { type: "KEYWORD"; value: "SELECT" }
-    ? ParseSelectColumns<Rest, Schema, State>
+    ? ParseSelectColumns<Rest, Schema, State> extends infer Result
+      ? Result extends Record<string, any>
+        ? Result[]
+        : never
+      : never
     : ParseQueryType<Rest, Schema, State>
   : never;
 
@@ -306,7 +310,7 @@ type ParseSelectColumns<
   Schema extends GeneratedSchema,
   State extends QueryState
 > = Tokens extends [infer First, ...infer Rest]
-  ? First extends { type: "SYMBOL"; value: "*" }
+  ? First extends { type: "IDENTIFIER"; value: "*" }
     ? ParseFromClause<
         Rest,
         Schema,

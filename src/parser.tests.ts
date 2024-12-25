@@ -169,3 +169,45 @@ type TestQueryState = ParseSelectColumns<
   }
 >;
 // Should show state with accumulated columns ["title", "content"]
+
+// Query parsing - step by step tests
+type TestQueryTokens = LexSqlTokens<
+  TokenizeSqlString<"SELECT * FROM schema.posts">
+>;
+// Should show: [{ type: "KEYWORD", value: "SELECT" }, { type: "SYMBOL", value: "*" }, ...]
+
+type TestInitialState = {
+  currentDatabase: never;
+  currentTableName: never;
+  allColumns: false;
+  specificColumns: [];
+};
+
+// Test each parsing step
+type TestAfterSelect = ParseSelectColumns<
+  [
+    { type: "IDENTIFIER"; value: "*" },
+    { type: "KEYWORD"; value: "FROM" },
+    { type: "IDENTIFIER"; value: "schema.posts" }
+  ],
+  TestQuerySchema,
+  TestInitialState
+>;
+
+type TestAfterStar = ParseFromClause<
+  [
+    { type: "KEYWORD"; value: "FROM" },
+    { type: "IDENTIFIER"; value: "schema.posts" }
+  ],
+  TestQuerySchema,
+  {
+    currentDatabase: never;
+    currentTableName: never;
+    allColumns: true;
+    specificColumns: [];
+  }
+>;
+
+// Test table columns extraction
+type TestTableColumns = GetTableColumns<TestQuerySchema, "schema", "posts">;
+type TestTableResult = TableColumnsToResult<TestTableColumns>;
