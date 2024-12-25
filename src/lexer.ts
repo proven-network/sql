@@ -9,12 +9,14 @@ type SqliteKeyword =
   | "DROP"
   | "DROP COLUMN"
   | "DROP TABLE"
+  | "FROM"
   | "IF EXISTS"
   | "IF NOT EXISTS"
   | "NOT NULL"
   | "PRIMARY KEY"
   | "RENAME"
   | "RENAME COLUMN"
+  | "SELECT"
   | "TO";
 
 // Token type definitions

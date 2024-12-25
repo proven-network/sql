@@ -125,3 +125,47 @@ type TestSchemaStateAlterTableDropTable = ParseMigration<
   LexSqlTokens<TokenizeSqlString<`DROP TABLE schema.likes;`>>,
   TestSchemaStateSecondTable
 >;
+
+// Query parsing test cases
+type TestQuerySchema = {
+  tables: {
+    "schema.posts": {
+      id: { type: "INTEGER"; isNullable: false };
+      title: { type: "TEXT"; isNullable: false };
+      content: { type: "TEXT"; isNullable: true };
+      published_at: { type: "INTEGER"; isNullable: false };
+    };
+  };
+};
+
+// Test SELECT * parsing
+type TestSelectAllTokens = LexSqlTokens<
+  TokenizeSqlString<"SELECT * FROM schema.posts">
+>;
+
+type TestSelectAllQuery = ParseQueryType<TestSelectAllTokens, TestQuerySchema>;
+// Should equal: { id: number; title: string; content: string | null; published_at: number; }[]
+
+// Test specific columns
+type TestSelectColumnsTokens = LexSqlTokens<
+  TokenizeSqlString<"SELECT title, content FROM schema.posts">
+>;
+
+type TestSelectColumnsQuery = ParseQueryType<
+  TestSelectColumnsTokens,
+  TestQuerySchema
+>;
+// Should equal: { title: string; content: string | null; }[]
+
+// Test state accumulation
+type TestQueryState = ParseSelectColumns<
+  TestSelectColumnsTokens,
+  TestQuerySchema,
+  {
+    currentDatabase: never;
+    currentTableName: never;
+    allColumns: false;
+    specificColumns: [];
+  }
+>;
+// Should show state with accumulated columns ["title", "content"]

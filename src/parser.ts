@@ -37,15 +37,15 @@ type InitialCreateTableState = {
 type QueryState = {
   currentDatabase: string;
   currentTableName: string;
-  currentSelectColumns: string[];
-  currentJoinTables: string[];
+  allColumns: boolean;
+  specificColumns: string[];
 };
 
 type InitialQueryState = {
   currentDatabase: never;
   currentTableName: never;
-  currentSelectColumns: never;
-  currentJoinTables: never;
+  allColumns: false;
+  specificColumns: [];
 };
 
 type AlterTableState = {
@@ -293,6 +293,59 @@ type ParseMigration<
 
 type ParseQueryType<
   Tokens extends readonly any[],
-  Schema extends GeneratedSchema = InitialGeneratedSchema,
+  Schema extends GeneratedSchema,
   State extends QueryState = InitialQueryState
-> = Tokens extends [infer First, ...infer Rest] ? any[] : any[];
+> = Tokens extends [infer First, ...infer Rest]
+  ? First extends { type: "KEYWORD"; value: "SELECT" }
+    ? ParseSelectColumns<Rest, Schema, State>
+    : ParseQueryType<Rest, Schema, State>
+  : never;
+
+type ParseSelectColumns<
+  Tokens extends readonly any[],
+  Schema extends GeneratedSchema,
+  State extends QueryState
+> = Tokens extends [infer First, ...infer Rest]
+  ? First extends { type: "SYMBOL"; value: "*" }
+    ? ParseFromClause<
+        Rest,
+        Schema,
+        {
+          currentDatabase: State["currentDatabase"];
+          currentTableName: State["currentTableName"];
+          allColumns: true;
+          specificColumns: [];
+        }
+      >
+    : First extends { type: "IDENTIFIER"; value: string }
+    ? ParseSelectColumns<
+        Rest,
+        Schema,
+        {
+          currentDatabase: State["currentDatabase"];
+          currentTableName: State["currentTableName"];
+          allColumns: false;
+          specificColumns: [...State["specificColumns"], First["value"]];
+        }
+      >
+    : First extends { type: "KEYWORD"; value: "FROM" }
+    ? ParseFromClause<Rest, Schema, State>
+    : ParseSelectColumns<Rest, Schema, State>
+  : never;
+
+type ParseFromClause<
+  Tokens extends readonly any[],
+  Schema extends GeneratedSchema,
+  State extends QueryState
+> = Tokens extends [
+  { type: "KEYWORD"; value: "FROM" },
+  { type: "IDENTIFIER"; value: `${infer DB}.${infer Table}` },
+  ...infer Rest
+]
+  ? State["allColumns"] extends true
+    ? TableColumnsToResult<GetTableColumns<Schema, DB, Table>>
+    : Pick<
+        TableColumnsToResult<GetTableColumns<Schema, DB, Table>>,
+        State["specificColumns"][number]
+      >
+  : never;
