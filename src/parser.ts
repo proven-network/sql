@@ -318,8 +318,6 @@ type ParseQueryType<
     : ParseQueryType<Rest, Schema, State>
   : never;
 
-// Remove EvaluateQueryResult as it's no longer needed
-
 type ParseSelectColumns<
   Tokens extends readonly any[],
   Schema extends GeneratedSchema,
@@ -352,7 +350,6 @@ type ParseSelectColumns<
     : ParseSelectColumns<Rest, Schema, State>
   : never;
 
-// Updated ParseFromClause
 type ParseFromClause<
   Tokens extends readonly any[],
   Schema extends GeneratedSchema,

@@ -5,11 +5,19 @@ type GetTableColumns<
 > = Schema["tables"][`${DB}.${Table}`];
 
 type ColumnToType<T extends ColumnDetails> = T["type"] extends "INTEGER"
-  ? number
+  ? T["isNullable"] extends true
+    ? number | null
+    : number
   : T["type"] extends "TEXT"
-  ? string
+  ? T["isNullable"] extends true
+    ? string | null
+    : string
   : T["type"] extends "REAL"
-  ? number
+  ? T["isNullable"] extends true
+    ? number | null
+    : number
   : T["type"] extends "BLOB"
-  ? Uint8Array
+  ? T["isNullable"] extends true
+    ? Uint8Array | null
+    : Uint8Array
   : never;

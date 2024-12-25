@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
-    "noErrorTruncation": true
+    "noErrorTruncation": true,
+    "strict": true
   }
 }

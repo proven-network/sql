@@ -49,5 +49,3 @@ const DB = getApplicationDb("main")
   );
 
 const rows = DB.query("SELECT * FROM schema.posts");
-
-const { id, title, content, creator, published_at, updated_at } = rows[0];
