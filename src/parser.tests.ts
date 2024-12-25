@@ -207,7 +207,3 @@ type TestAfterStar = ParseFromClause<
     specificColumns: [];
   }
 >;
-
-// Test table columns extraction
-type TestTableColumns = GetTableColumns<TestQuerySchema, "schema", "posts">;
-type TestTableResult = TableColumnsToResult<TestTableColumns>;

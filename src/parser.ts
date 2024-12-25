@@ -297,13 +297,28 @@ type ParseQueryType<
   State extends QueryState = InitialQueryState
 > = Tokens extends [infer First, ...infer Rest]
   ? First extends { type: "KEYWORD"; value: "SELECT" }
-    ? ParseSelectColumns<Rest, Schema, State> extends infer Result
-      ? Result extends Record<string, any>
-        ? Result[]
-        : never
+    ? ParseSelectColumns<Rest, Schema, State> extends Record<
+        string,
+        ColumnDetails
+      >
+      ? {
+          [K in keyof ParseSelectColumns<
+            Rest,
+            Schema,
+            State
+          >]: ParseSelectColumns<
+            Rest,
+            Schema,
+            State
+          >[K]["isNullable"] extends true
+            ? ColumnToType<ParseSelectColumns<Rest, Schema, State>[K]> | null
+            : ColumnToType<ParseSelectColumns<Rest, Schema, State>[K]>;
+        }[]
       : never
     : ParseQueryType<Rest, Schema, State>
   : never;
+
+// Remove EvaluateQueryResult as it's no longer needed
 
 type ParseSelectColumns<
   Tokens extends readonly any[],
@@ -337,6 +352,7 @@ type ParseSelectColumns<
     : ParseSelectColumns<Rest, Schema, State>
   : never;
 
+// Updated ParseFromClause
 type ParseFromClause<
   Tokens extends readonly any[],
   Schema extends GeneratedSchema,
@@ -347,15 +363,8 @@ type ParseFromClause<
   ...infer Rest
 ]
   ? State["allColumns"] extends true
-    ? EvaluateTableColumns<
-        TableColumnsToResult<GetTableColumns<Schema, DB, Table>>
-      >
-    : Pick<
-        EvaluateTableColumns<
-          TableColumnsToResult<GetTableColumns<Schema, DB, Table>>
-        >,
-        State["specificColumns"][number]
-      >
+    ? GetTableColumns<Schema, DB, Table>
+    : Pick<GetTableColumns<Schema, DB, Table>, State["specificColumns"][number]>
   : Tokens extends [{ type: "KEYWORD"; value: "FROM" }, ...infer Rest]
   ? ParseFromClause<Rest, Schema, State>
   : Tokens extends [infer _, ...infer Rest]
