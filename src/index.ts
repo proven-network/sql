@@ -42,8 +42,7 @@ const DB = getApplicationDb("main")
   );`
   )
   .migrate(`ALTER TABLE schema.posts DROP COLUMN updated_at;`)
-  .migrate(
-    `ALTER TABLE schema.posts RENAME COLUMN created_at TO published_at;`
-  );
+  .migrate(`ALTER TABLE schema.posts RENAME COLUMN created_at TO published_at;`)
+  .migrate(`DROP TABLE schema.likes;`);
 
 const test = DB.query("SELECT * FROM schema.posts");

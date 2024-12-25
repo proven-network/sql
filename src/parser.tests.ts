@@ -105,3 +105,23 @@ type TestRenameColumnSimple = RenameColumn<
   "old_name",
   "new_name"
 >;
+
+type TestRemoveTableSimple = RemoveTable<
+  {
+    "schema.test": {
+      id: { type: "INTEGER"; isNullable: false };
+      name: { type: "TEXT"; isNullable: true };
+    };
+    "schema.test2": {
+      id: { type: "INTEGER"; isNullable: false };
+      name: { type: "TEXT"; isNullable: true };
+    };
+  },
+  "schema",
+  "test"
+>;
+
+type TestSchemaStateAlterTableDropTable = ParseMigration<
+  LexSqlTokens<TokenizeSqlString<`DROP TABLE schema.likes;`>>,
+  TestSchemaStateSecondTable
+>;

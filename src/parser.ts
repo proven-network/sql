@@ -14,7 +14,7 @@ type InitialGeneratedSchema = {
   tables: {};
 };
 
-// INTERMEDIATE TYPES
+// INTERMEDIATE STATES
 type CurrentColumn = {
   name: string;
   type: string;
@@ -53,15 +53,17 @@ type InitialDropTableState = {
   currentTableName: never;
 };
 
-type ProcessColumnDefinitionTokens<
+// PARSERS
+
+type ParseColumnDefinitions<
   Tokens extends readonly any[],
   Schema extends GeneratedSchema,
   State extends CreateTableState
 > = Tokens extends [infer First, ...infer Rest]
   ? First extends { type: "KEYWORD"; value: "CREATE TABLE" }
-    ? ProcessColumnDefinitionTokens<Rest, Schema, State>
+    ? ParseColumnDefinitions<Rest, Schema, State>
     : First extends { type: "IDENTIFIER"; value: string }
-    ? ProcessColumnDefinitionTokens<
+    ? ParseColumnDefinitions<
         Rest,
         Schema,
         {
@@ -74,7 +76,7 @@ type ProcessColumnDefinitionTokens<
         }
       >
     : First extends { type: "TYPE"; value: string }
-    ? ProcessColumnDefinitionTokens<
+    ? ParseColumnDefinitions<
         Rest,
         Schema,
         {
@@ -87,7 +89,7 @@ type ProcessColumnDefinitionTokens<
         }
       >
     : First extends { type: "KEYWORD"; value: "PRIMARY KEY" | "NOT NULL" }
-    ? ProcessColumnDefinitionTokens<
+    ? ParseColumnDefinitions<
         Rest,
         Schema,
         {
@@ -110,7 +112,7 @@ type ProcessColumnDefinitionTokens<
           >
         >;
       }
-    : ProcessColumnDefinitionTokens<Rest, Schema, State>
+    : ParseColumnDefinitions<Rest, Schema, State>
   : never;
 
 type ParseCreateTable<
@@ -132,7 +134,7 @@ type ParseCreateTable<
         }
       >
     : First extends { type: "SYMBOL"; value: "(" }
-    ? ProcessColumnDefinitionTokens<Rest, Schema, State>
+    ? ParseColumnDefinitions<Rest, Schema, State>
     : never
   : never;
 
@@ -215,7 +217,14 @@ type ParseDropTable<
   Tokens extends readonly any[],
   Schema extends GeneratedSchema = InitialGeneratedSchema,
   State extends DropTableState = InitialDropTableState
-> = Tokens extends [infer First, ...infer Rest] ? never : never;
+> = Tokens extends [infer First, ...infer Rest]
+  ? First extends {
+      type: "IDENTIFIER";
+      value: `${infer Database}.${infer Table}`;
+    }
+    ? { tables: RemoveTable<Schema["tables"], Database, Table> }
+    : ParseDropTable<Rest, Schema, State>
+  : Schema;
 
 type ParseMigration<
   Tokens extends readonly any[],
