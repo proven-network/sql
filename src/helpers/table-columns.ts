@@ -19,3 +19,11 @@ type TableColumnsToResult<T extends Record<string, ColumnDetails>> = {
     ? ColumnToType<T[K]> | null
     : ColumnToType<T[K]>;
 };
+
+type EvaluateTableColumns<T> = T extends TableColumnsToResult<infer Columns>
+  ? {
+      [K in keyof Columns]: Columns[K]["isNullable"] extends true
+        ? ColumnToType<Columns[K]> | null
+        : ColumnToType<Columns[K]>;
+    }
+  : never;

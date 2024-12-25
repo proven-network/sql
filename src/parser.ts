@@ -347,9 +347,17 @@ type ParseFromClause<
   ...infer Rest
 ]
   ? State["allColumns"] extends true
-    ? TableColumnsToResult<GetTableColumns<Schema, DB, Table>>
+    ? EvaluateTableColumns<
+        TableColumnsToResult<GetTableColumns<Schema, DB, Table>>
+      >
     : Pick<
-        TableColumnsToResult<GetTableColumns<Schema, DB, Table>>,
+        EvaluateTableColumns<
+          TableColumnsToResult<GetTableColumns<Schema, DB, Table>>
+        >,
         State["specificColumns"][number]
       >
+  : Tokens extends [{ type: "KEYWORD"; value: "FROM" }, ...infer Rest]
+  ? ParseFromClause<Rest, Schema, State>
+  : Tokens extends [infer _, ...infer Rest]
+  ? ParseFromClause<Rest, Schema, State>
   : never;

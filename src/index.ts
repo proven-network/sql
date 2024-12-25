@@ -48,4 +48,6 @@ const DB = getApplicationDb("main")
     `ALTER TABLE schema.posts ADD COLUMN updated_at INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP;`
   );
 
-const test = DB.query("SELECT * FROM schema.posts");
+const rows = DB.query("SELECT * FROM schema.posts");
+
+const { id, title, content, creator, published_at, updated_at } = rows[0];
