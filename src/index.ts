@@ -43,6 +43,9 @@ const DB = getApplicationDb("main")
   )
   .migrate(`ALTER TABLE schema.posts DROP COLUMN updated_at;`)
   .migrate(`ALTER TABLE schema.posts RENAME COLUMN created_at TO published_at;`)
-  .migrate(`DROP TABLE schema.likes;`);
+  .migrate(`DROP TABLE schema.likes;`)
+  .migrate(
+    `ALTER TABLE schema.posts ADD COLUMN updated_at INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP;`
+  );
 
 const test = DB.query("SELECT * FROM schema.posts");

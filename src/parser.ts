@@ -4,7 +4,8 @@ type ColumnDetails = {
   isNullable: boolean;
 };
 
-type TableRecord = Record<string, Record<string, ColumnDetails>>;
+type ColumnRecord = Record<string, ColumnDetails>;
+type TableRecord = Record<string, ColumnRecord>;
 
 type GeneratedSchema = {
   tables: TableRecord;
@@ -163,7 +164,11 @@ type ParseAlterTableAction<
   Schema extends GeneratedSchema,
   State extends AlterTableState
 > = Tokens extends [infer First, ...infer Rest]
-  ? First extends { type: "KEYWORD"; value: "DROP COLUMN" }
+  ? First extends { type: "KEYWORD"; value: "ADD COLUMN" }
+    ? ParseAddColumn<Rest, Schema, State>
+    : First extends { type: "KEYWORD"; value: "ADD" }
+    ? ParseAddColumn<Rest, Schema, State>
+    : First extends { type: "KEYWORD"; value: "DROP COLUMN" }
     ? ParseDropColumn<Rest, Schema, State>
     : First extends { type: "KEYWORD"; value: "DROP" } // COLUMN optional
     ? ParseDropColumn<Rest, Schema, State>
@@ -172,6 +177,39 @@ type ParseAlterTableAction<
     : First extends { type: "KEYWORD"; value: "RENAME" } // COLUMN optional
     ? ParseRenameColumn<Rest, Schema, State>
     : ParseAlterTableAction<Rest, Schema, State>
+  : Schema;
+
+type ParseAddColumn<
+  Tokens extends readonly any[],
+  Schema extends GeneratedSchema,
+  State extends AlterTableState
+> = Tokens extends [
+  { type: "IDENTIFIER"; value: infer Column extends string },
+  { type: "TYPE"; value: infer Type extends string },
+  ...infer Rest
+]
+  ? Rest extends [
+      { type: "KEYWORD"; value: "PRIMARY KEY" | "NOT NULL" },
+      ...infer RestAfterConstraint
+    ]
+    ? {
+        tables: AddColumn<
+          Schema["tables"],
+          State["currentDatabase"],
+          State["currentTableName"],
+          Column,
+          { type: Type; isNullable: false }
+        >;
+      }
+    : {
+        tables: AddColumn<
+          Schema["tables"],
+          State["currentDatabase"],
+          State["currentTableName"],
+          Column,
+          { type: Type; isNullable: true }
+        >;
+      }
   : Schema;
 
 type ParseDropColumn<
