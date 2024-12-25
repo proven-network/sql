@@ -25,7 +25,7 @@ export function getApplicationDb(name: string): TypedDatabase {
 const DB = getApplicationDb("main")
   .migrate(
     `
-  CREATE TABLE schema.posts (
+  CREATE TABLE posts (
     id integer primary KEY,
     title text not null,
     content text,
@@ -36,16 +36,16 @@ const DB = getApplicationDb("main")
   )
   .migrate(
     `
-  CREATE TABLE schema.likes (
+  CREATE TABLE likes (
     post_id INTEGER NOT NULL,
     user_id TEXT NOT NULL
   );`
   )
-  .migrate(`ALTER TABLE schema.posts DROP COLUMN updated_at;`)
-  .migrate(`ALTER TABLE schema.posts RENAME COLUMN created_at TO published_at;`)
-  .migrate(`DROP TABLE schema.likes;`)
+  .migrate(`ALTER TABLE posts DROP COLUMN updated_at;`)
+  .migrate(`ALTER TABLE posts RENAME COLUMN created_at TO published_at;`)
+  .migrate(`DROP TABLE likes;`)
   .migrate(
-    `ALTER TABLE schema.posts ADD COLUMN updated_at INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP;`
+    `ALTER TABLE posts ADD COLUMN updated_at INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP;`
   );
 
-const rows = DB.query("SELECT * FROM schema.posts");
+const rows = DB.query("SELECT * FROM posts");

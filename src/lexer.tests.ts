@@ -29,7 +29,7 @@ type TestAlterTable = LexSqlTokens<
 
 type TestBig = LexSqlTokens<
   TokenizeSqlString<`
-  CREATE TABLE schema.posts (
+  CREATE TABLE posts (
     id INTEGER PRIMARY KEY,
     title TEXT NOT NULL,
     content TEXT,

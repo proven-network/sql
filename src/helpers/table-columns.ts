@@ -1,8 +1,7 @@
 type GetTableColumns<
   Schema extends GeneratedSchema,
-  DB extends string,
   Table extends string
-> = Schema["tables"][`${DB}.${Table}`];
+> = Schema["tables"][Table];
 
 type ColumnToType<T extends ColumnDetails> = T["type"] extends "INTEGER"
   ? T["isNullable"] extends true

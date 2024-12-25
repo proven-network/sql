@@ -7,28 +7,22 @@ type TestUpdate = UpdateLastColumn<
 >;
 
 type TestTableRecord = {
-  "schema.users": {
+  users: {
     id: { type: "INTEGER"; isNullable: false };
     name: { type: "TEXT"; isNullable: false };
     email: { type: "TEXT"; isNullable: true };
   };
-  "schema.posts": {
+  posts: {
     id: { type: "INTEGER"; isNullable: false };
     title: { type: "TEXT"; isNullable: false };
     content: { type: "TEXT"; isNullable: true };
   };
 };
 
-type TestRemoveColumn = RemoveColumn<
-  TestTableRecord,
-  "schema",
-  "users",
-  "email"
->;
+type TestRemoveColumn = RemoveColumn<TestTableRecord, "users", "email">;
 
 type TestRenameColumn = RenameColumn<
   TestTableRecord,
-  "schema",
   "users",
   "name",
   "full_name"
@@ -36,7 +30,7 @@ type TestRenameColumn = RenameColumn<
 
 type TestSchemaStateFirstTable = ParseMigration<
   LexSqlTokens<
-    TokenizeSqlString<`create table schema.posts (
+    TokenizeSqlString<`create table posts (
         id integer primary KEY,
         title text not null,
         content text,
@@ -49,7 +43,7 @@ type TestSchemaStateFirstTable = ParseMigration<
 
 type TestSchemaStateSecondTable = ParseMigration<
   LexSqlTokens<
-    TokenizeSqlString<`CREATE TABLE schema.likes (
+    TokenizeSqlString<`CREATE TABLE likes (
         post_id INTEGER NOT NULL,
         user_id TEXT NOT NULL
       );`>
@@ -58,34 +52,32 @@ type TestSchemaStateSecondTable = ParseMigration<
 >;
 
 type TestTokens = LexSqlTokens<
-  TokenizeSqlString<`ALTER TABLE schema.likes DROP COLUMN user_id;`>
+  TokenizeSqlString<`ALTER TABLE likes DROP COLUMN user_id;`>
 >;
 
 type TestSchemaStateAlterTableDropCol = ParseMigration<
-  LexSqlTokens<
-    TokenizeSqlString<`ALTER TABLE schema.likes DROP COLUMN user_id`>
-  >,
+  LexSqlTokens<TokenizeSqlString<`ALTER TABLE likes DROP COLUMN user_id`>>,
   TestSchemaStateSecondTable
 >;
 
 type TestSchemaStateAlterTableRenameCol = ParseMigration<
   LexSqlTokens<
-    TokenizeSqlString<`ALTER TABLE schema.likes RENAME COLUMN post_id TO new_post_id;`>
+    TokenizeSqlString<`ALTER TABLE likes RENAME COLUMN post_id TO new_post_id;`>
   >,
   TestSchemaStateSecondTable
 >;
 
 type TestTableBasic = {
-  "schema.test": {
+  test: {
     id: { type: "INTEGER"; isNullable: false };
     name: { type: "TEXT"; isNullable: true };
   };
 };
 
-type TestRemoveBasic = RemoveColumn<TestTableBasic, "schema", "test", "name">;
+type TestRemoveBasic = RemoveColumn<TestTableBasic, "test", "name">;
 
 type TestAlterTokens = LexSqlTokens<
-  TokenizeSqlString<"ALTER TABLE schema.test RENAME COLUMN name TO full_name;">
+  TokenizeSqlString<"ALTER TABLE test RENAME COLUMN name TO full_name;">
 >;
 
 type TestAlterParse = ParseAlterTable<
@@ -95,12 +87,11 @@ type TestAlterParse = ParseAlterTable<
 
 type TestRenameColumnSimple = RenameColumn<
   {
-    "schema.test": {
+    test: {
       id: { type: "INTEGER"; isNullable: false };
       old_name: { type: "TEXT"; isNullable: true };
     };
   },
-  "schema",
   "test",
   "old_name",
   "new_name"
@@ -108,28 +99,27 @@ type TestRenameColumnSimple = RenameColumn<
 
 type TestRemoveTableSimple = RemoveTable<
   {
-    "schema.test": {
+    test: {
       id: { type: "INTEGER"; isNullable: false };
       name: { type: "TEXT"; isNullable: true };
     };
-    "schema.test2": {
+    test2: {
       id: { type: "INTEGER"; isNullable: false };
       name: { type: "TEXT"; isNullable: true };
     };
   },
-  "schema",
   "test"
 >;
 
 type TestSchemaStateAlterTableDropTable = ParseMigration<
-  LexSqlTokens<TokenizeSqlString<`DROP TABLE schema.likes;`>>,
+  LexSqlTokens<TokenizeSqlString<`DROP TABLE likes;`>>,
   TestSchemaStateSecondTable
 >;
 
 // Query parsing test cases
 type TestQuerySchema = {
   tables: {
-    "schema.posts": {
+    posts: {
       id: { type: "INTEGER"; isNullable: false };
       title: { type: "TEXT"; isNullable: false };
       content: { type: "TEXT"; isNullable: true };
@@ -140,7 +130,7 @@ type TestQuerySchema = {
 
 // Test SELECT * parsing
 type TestSelectAllTokens = LexSqlTokens<
-  TokenizeSqlString<"SELECT * FROM schema.posts">
+  TokenizeSqlString<"SELECT * FROM posts">
 >;
 
 type TestSelectAllQuery = ParseQueryType<TestSelectAllTokens, TestQuerySchema>;
@@ -148,7 +138,7 @@ type TestSelectAllQuery = ParseQueryType<TestSelectAllTokens, TestQuerySchema>;
 
 // Test specific columns
 type TestSelectColumnsTokens = LexSqlTokens<
-  TokenizeSqlString<"SELECT title, content FROM schema.posts">
+  TokenizeSqlString<"SELECT title, content FROM posts">
 >;
 
 type TestSelectColumnsQuery = ParseQueryType<
@@ -162,7 +152,6 @@ type TestQueryState = ParseSelectColumns<
   TestSelectColumnsTokens,
   TestQuerySchema,
   {
-    currentDatabase: never;
     currentTableName: never;
     allColumns: false;
     specificColumns: [];
@@ -171,13 +160,10 @@ type TestQueryState = ParseSelectColumns<
 // Should show state with accumulated columns ["title", "content"]
 
 // Query parsing - step by step tests
-type TestQueryTokens = LexSqlTokens<
-  TokenizeSqlString<"SELECT * FROM schema.posts">
->;
+type TestQueryTokens = LexSqlTokens<TokenizeSqlString<"SELECT * FROM posts">>;
 // Should show: [{ type: "KEYWORD", value: "SELECT" }, { type: "SYMBOL", value: "*" }, ...]
 
 type TestInitialState = {
-  currentDatabase: never;
   currentTableName: never;
   allColumns: false;
   specificColumns: [];
@@ -188,20 +174,16 @@ type TestAfterSelect = ParseSelectColumns<
   [
     { type: "IDENTIFIER"; value: "*" },
     { type: "KEYWORD"; value: "FROM" },
-    { type: "IDENTIFIER"; value: "schema.posts" }
+    { type: "IDENTIFIER"; value: "posts" }
   ],
   TestQuerySchema,
   TestInitialState
 >;
 
 type TestAfterStar = ParseFromClause<
-  [
-    { type: "KEYWORD"; value: "FROM" },
-    { type: "IDENTIFIER"; value: "schema.posts" }
-  ],
+  [{ type: "KEYWORD"; value: "FROM" }, { type: "IDENTIFIER"; value: "posts" }],
   TestQuerySchema,
   {
-    currentDatabase: never;
     currentTableName: never;
     allColumns: true;
     specificColumns: [];

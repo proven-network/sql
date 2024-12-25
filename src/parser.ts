@@ -23,48 +23,40 @@ type CurrentColumn = {
 };
 
 type CreateTableState = {
-  currentDatabase: string;
   currentTableName: string;
   currentColumns: CurrentColumn[];
 };
 
 type InitialCreateTableState = {
-  currentDatabase: never;
   currentTableName: never;
   currentColumns: CurrentColumn[];
 };
 
 type QueryState = {
-  currentDatabase: string;
   currentTableName: string;
   allColumns: boolean;
   specificColumns: string[];
 };
 
 type InitialQueryState = {
-  currentDatabase: never;
   currentTableName: never;
   allColumns: false;
   specificColumns: [];
 };
 
 type AlterTableState = {
-  currentDatabase: string;
   currentTableName: string;
 };
 
 type InitialAlterTableState = {
-  currentDatabase: never;
   currentTableName: never;
 };
 
 type DropTableState = {
-  currentDatabase: string;
   currentTableName: string;
 };
 
 type InitialDropTableState = {
-  currentDatabase: never;
   currentTableName: never;
 };
 
@@ -82,7 +74,6 @@ type ParseColumnDefinitions<
         Rest,
         Schema,
         {
-          currentDatabase: State["currentDatabase"];
           currentTableName: State["currentTableName"];
           currentColumns: [
             ...State["currentColumns"],
@@ -95,7 +86,6 @@ type ParseColumnDefinitions<
         Rest,
         Schema,
         {
-          currentDatabase: State["currentDatabase"];
           currentTableName: State["currentTableName"];
           currentColumns: UpdateLastColumn<
             State["currentColumns"],
@@ -108,7 +98,6 @@ type ParseColumnDefinitions<
         Rest,
         Schema,
         {
-          currentDatabase: State["currentDatabase"];
           currentTableName: State["currentTableName"];
           currentColumns: UpdateLastColumn<
             State["currentColumns"],
@@ -121,7 +110,6 @@ type ParseColumnDefinitions<
         tables: EvaluateAddTable<
           AddTable<
             Schema["tables"],
-            State["currentDatabase"],
             State["currentTableName"],
             State["currentColumns"]
           >
@@ -137,13 +125,12 @@ type ParseCreateTable<
 > = Tokens extends [infer First, ...infer Rest]
   ? First extends {
       type: "IDENTIFIER";
-      value: `${infer Database}.${infer Table}`;
+      value: infer Table extends string;
     }
     ? ParseCreateTable<
         Rest,
         Schema,
         {
-          currentDatabase: Database;
           currentTableName: Table;
           currentColumns: [];
         }
@@ -160,13 +147,12 @@ type ParseAlterTable<
 > = Tokens extends [infer First, ...infer Rest]
   ? First extends {
       type: "IDENTIFIER";
-      value: `${infer Database}.${infer Table}`;
+      value: infer Table extends string;
     }
     ? ParseAlterTableAction<
         Rest,
         Schema,
         {
-          currentDatabase: Database;
           currentTableName: Table;
         }
       >
@@ -209,7 +195,6 @@ type ParseAddColumn<
     ? {
         tables: AddColumn<
           Schema["tables"],
-          State["currentDatabase"],
           State["currentTableName"],
           Column,
           { type: Type; isNullable: false }
@@ -218,7 +203,6 @@ type ParseAddColumn<
     : {
         tables: AddColumn<
           Schema["tables"],
-          State["currentDatabase"],
           State["currentTableName"],
           Column,
           { type: Type; isNullable: true }
@@ -235,12 +219,7 @@ type ParseDropColumn<
   ...infer Rest
 ]
   ? {
-      tables: RemoveColumn<
-        Schema["tables"],
-        State["currentDatabase"],
-        State["currentTableName"],
-        Column
-      >;
+      tables: RemoveColumn<Schema["tables"], State["currentTableName"], Column>;
     }
   : Schema;
 
@@ -257,7 +236,6 @@ type ParseRenameColumn<
   ? {
       tables: RenameColumn<
         Schema["tables"],
-        State["currentDatabase"],
         State["currentTableName"],
         OldColumn & string,
         NewColumn & string
@@ -272,9 +250,9 @@ type ParseDropTable<
 > = Tokens extends [infer First, ...infer Rest]
   ? First extends {
       type: "IDENTIFIER";
-      value: `${infer Database}.${infer Table}`;
+      value: infer Table extends string;
     }
-    ? { tables: RemoveTable<Schema["tables"], Database, Table> }
+    ? { tables: RemoveTable<Schema["tables"], Table> }
     : ParseDropTable<Rest, Schema, State>
   : Schema;
 
@@ -320,7 +298,6 @@ type ParseSelectColumns<
         Rest,
         Schema,
         {
-          currentDatabase: State["currentDatabase"];
           currentTableName: State["currentTableName"];
           allColumns: true;
           specificColumns: [];
@@ -331,7 +308,6 @@ type ParseSelectColumns<
         Rest,
         Schema,
         {
-          currentDatabase: State["currentDatabase"];
           currentTableName: State["currentTableName"];
           allColumns: false;
           specificColumns: [...State["specificColumns"], First["value"]];
@@ -348,12 +324,12 @@ type ParseFromClause<
   State extends QueryState
 > = Tokens extends [
   { type: "KEYWORD"; value: "FROM" },
-  { type: "IDENTIFIER"; value: `${infer DB}.${infer Table}` },
+  { type: "IDENTIFIER"; value: infer Table extends string },
   ...infer Rest
 ]
   ? State["allColumns"] extends true
-    ? GetTableColumns<Schema, DB, Table>
-    : Pick<GetTableColumns<Schema, DB, Table>, State["specificColumns"][number]>
+    ? GetTableColumns<Schema, Table>
+    : Pick<GetTableColumns<Schema, Table>, State["specificColumns"][number]>
   : Tokens extends [{ type: "KEYWORD"; value: "FROM" }, ...infer Rest]
   ? ParseFromClause<Rest, Schema, State>
   : Tokens extends [infer _, ...infer Rest]
