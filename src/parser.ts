@@ -302,17 +302,9 @@ type ParseQueryType<
         ColumnDetails
       >
       ? {
-          [K in keyof ParseSelectColumns<
-            Rest,
-            Schema,
-            State
-          >]: ParseSelectColumns<
-            Rest,
-            Schema,
-            State
-          >[K]["isNullable"] extends true
-            ? ColumnToType<ParseSelectColumns<Rest, Schema, State>[K]> | null
-            : ColumnToType<ParseSelectColumns<Rest, Schema, State>[K]>;
+          [K in keyof ParseSelectColumns<Rest, Schema, State>]: ColumnToType<
+            ParseSelectColumns<Rest, Schema, State>[K]
+          >;
         }[]
       : never
     : ParseQueryType<Rest, Schema, State>
