@@ -1,3 +1,5 @@
+import { CurrentColumn, TableRecord } from "../state";
+
 type LastElement<T extends any[]> = T extends [...any[], infer Last]
   ? Last extends CurrentColumn
     ? Last
@@ -6,14 +8,14 @@ type LastElement<T extends any[]> = T extends [...any[], infer Last]
 
 type AllButLast<T extends CurrentColumn[]> = T extends [
   ...infer Rest extends CurrentColumn[],
-  any
+  any,
 ]
   ? Rest
   : T;
 
 type MergeColumn<
   Col extends CurrentColumn,
-  Updates extends Partial<CurrentColumn>
+  Updates extends Partial<CurrentColumn>,
 > = Col extends {
   name: infer N extends string;
   type: infer T extends string;
@@ -28,9 +30,9 @@ type MergeColumn<
     }
   : never;
 
-type UpdateLastColumn<
+export type UpdateLastColumn<
   Columns extends CurrentColumn[],
-  Updates extends Partial<CurrentColumn>
+  Updates extends Partial<CurrentColumn>,
 > = Columns["length"] extends 0
   ? Columns
   : [...AllButLast<Columns>, MergeColumn<LastElement<Columns>, Updates>];

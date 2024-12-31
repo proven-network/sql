@@ -1,7 +1,16 @@
+import { LexSqlTokens } from "./lexer";
+import { ParseMigration, ParseQueryType } from "./parser";
+import { TokenizeSqlString } from "./tokenizer";
+
+import { UpdateLastColumn } from "./helpers/merge-column";
+import { RemoveColumn } from "./helpers/remove-column";
+import { RemoveTable } from "./helpers/remove-table";
+import { RenameColumn } from "./helpers/rename-column";
+
 type TestUpdate = UpdateLastColumn<
   [
     { name: "id"; type: "INTEGER"; isNullable: true },
-    { name: "title"; type: "TEXT"; isNullable: true }
+    { name: "title"; type: "TEXT"; isNullable: true },
   ],
   { isNullable: false }
 >;
@@ -80,7 +89,7 @@ type TestAlterTokens = LexSqlTokens<
   TokenizeSqlString<"ALTER TABLE test RENAME COLUMN name TO full_name;">
 >;
 
-type TestAlterParse = ParseAlterTable<
+type TestAlterParse = ParseMigration<
   TestAlterTokens,
   { tables: TestTableBasic }
 >;
@@ -128,15 +137,12 @@ type TestQuerySchema = {
   };
 };
 
-// Test SELECT * parsing
 type TestSelectAllTokens = LexSqlTokens<
   TokenizeSqlString<"SELECT * FROM posts">
 >;
 
 type TestSelectAllQuery = ParseQueryType<TestSelectAllTokens, TestQuerySchema>;
-// Should equal: { id: number; title: string; content: string | null; published_at: number; }[]
 
-// Test specific columns
 type TestSelectColumnsTokens = LexSqlTokens<
   TokenizeSqlString<"SELECT title, content FROM posts">
 >;
@@ -144,48 +150,4 @@ type TestSelectColumnsTokens = LexSqlTokens<
 type TestSelectColumnsQuery = ParseQueryType<
   TestSelectColumnsTokens,
   TestQuerySchema
->;
-// Should equal: { title: string; content: string | null; }[]
-
-// Test state accumulation
-type TestQueryState = ParseSelectColumns<
-  TestSelectColumnsTokens,
-  TestQuerySchema,
-  {
-    currentTableName: never;
-    allColumns: false;
-    specificColumns: [];
-  }
->;
-// Should show state with accumulated columns ["title", "content"]
-
-// Query parsing - step by step tests
-type TestQueryTokens = LexSqlTokens<TokenizeSqlString<"SELECT * FROM posts">>;
-// Should show: [{ type: "KEYWORD", value: "SELECT" }, { type: "SYMBOL", value: "*" }, ...]
-
-type TestInitialState = {
-  currentTableName: never;
-  allColumns: false;
-  specificColumns: [];
-};
-
-// Test each parsing step
-type TestAfterSelect = ParseSelectColumns<
-  [
-    { type: "IDENTIFIER"; value: "*" },
-    { type: "KEYWORD"; value: "FROM" },
-    { type: "IDENTIFIER"; value: "posts" }
-  ],
-  TestQuerySchema,
-  TestInitialState
->;
-
-type TestAfterStar = ParseFromClause<
-  [{ type: "KEYWORD"; value: "FROM" }, { type: "IDENTIFIER"; value: "posts" }],
-  TestQuerySchema,
-  {
-    currentTableName: never;
-    allColumns: true;
-    specificColumns: [];
-  }
 >;

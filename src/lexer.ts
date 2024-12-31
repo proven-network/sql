@@ -61,21 +61,21 @@ type LookaheadKeywordMap = {
 type ProcessWord<Word extends string> = Word extends "(" | ")" | "," | ";"
   ? { type: "SYMBOL"; value: Word }
   : ToUpper<Word> extends SqliteKeyword
-  ? { type: "KEYWORD"; value: ToUpper<Word> }
-  : ToUpper<Word> extends ColumnType
-  ? { type: "TYPE"; value: ToUpper<Word> }
-  : { type: "IDENTIFIER"; value: Word };
+    ? { type: "KEYWORD"; value: ToUpper<Word> }
+    : ToUpper<Word> extends ColumnType
+      ? { type: "TYPE"; value: ToUpper<Word> }
+      : { type: "IDENTIFIER"; value: Word };
 
 type ToUpper<S extends string> = Uppercase<S>;
 
-type LexSqlTokens<
+export type LexSqlTokens<
   Words extends readonly string[],
-  Acc extends Token[] = []
+  Acc extends Token[] = [],
 > = Words extends readonly [
   infer First extends string,
   infer Second extends string,
   infer Third extends string,
-  ...infer Rest extends string[]
+  ...infer Rest extends string[],
 ]
   ? ToUpper<First> extends keyof LookaheadKeywordMap
     ? ToUpper<Second> extends keyof LookaheadKeywordMap[ToUpper<First>]
@@ -85,27 +85,27 @@ type LexSqlTokens<
             [
               ...Acc,
               LookaheadKeywordMap[ToUpper<First>][ToUpper<Second>][ToUpper<Third>] &
-                Token
+                Token,
             ]
           >
         : LexSqlTokens<
             [Third, ...Rest],
             [
               ...Acc,
-              LookaheadKeywordMap[ToUpper<First>][ToUpper<Second>] & Token
+              LookaheadKeywordMap[ToUpper<First>][ToUpper<Second>] & Token,
             ]
           >
       : LexSqlTokens<[Second, Third, ...Rest], [...Acc, ProcessWord<First>]>
     : LexSqlTokens<[Second, Third, ...Rest], [...Acc, ProcessWord<First>]>
   : Words extends readonly [
-      infer First extends string,
-      infer Second extends string
-    ]
-  ? ToUpper<First> extends keyof LookaheadKeywordMap
-    ? ToUpper<Second> extends keyof LookaheadKeywordMap[ToUpper<First>]
-      ? [...Acc, LookaheadKeywordMap[ToUpper<First>][ToUpper<Second>]]
+        infer First extends string,
+        infer Second extends string,
+      ]
+    ? ToUpper<First> extends keyof LookaheadKeywordMap
+      ? ToUpper<Second> extends keyof LookaheadKeywordMap[ToUpper<First>]
+        ? [...Acc, LookaheadKeywordMap[ToUpper<First>][ToUpper<Second>]]
+        : [...Acc, ProcessWord<First>, ProcessWord<Second>]
       : [...Acc, ProcessWord<First>, ProcessWord<Second>]
-    : [...Acc, ProcessWord<First>, ProcessWord<Second>]
-  : Words extends readonly [infer Single extends string]
-  ? [...Acc, ProcessWord<Single>]
-  : Acc;
+    : Words extends readonly [infer Single extends string]
+      ? [...Acc, ProcessWord<Single>]
+      : Acc;

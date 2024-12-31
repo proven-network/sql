@@ -3,26 +3,26 @@ type ExtractWordOrSymbol<S extends string> =
   S extends `(${infer Rest}`
     ? ["(", ...ExtractWordOrSymbol<Rest>]
     : S extends `)${infer Rest}`
-    ? [")", ...ExtractWordOrSymbol<Rest>]
-    : S extends `,${infer Rest}`
-    ? [",", ...ExtractWordOrSymbol<Rest>]
-    : S extends `"${infer Rest}`
-    ? ['"', ...ExtractWordOrSymbol<Rest>]
-    : // Check end for symbol
-    S extends `${infer Start}(`
-    ? [...ExtractWordOrSymbol<Start>, "("]
-    : S extends `${infer Start})`
-    ? [...ExtractWordOrSymbol<Start>, ")"]
-    : S extends `${infer Start},`
-    ? [...ExtractWordOrSymbol<Start>, ","]
-    : S extends `${infer Start}"`
-    ? [...ExtractWordOrSymbol<Start>, '"']
-    : S extends `${infer Start};`
-    ? [...ExtractWordOrSymbol<Start>, ";"]
-    : // No symbols found
-    S extends ""
-    ? []
-    : [S];
+      ? [")", ...ExtractWordOrSymbol<Rest>]
+      : S extends `,${infer Rest}`
+        ? [",", ...ExtractWordOrSymbol<Rest>]
+        : S extends `"${infer Rest}`
+          ? ['"', ...ExtractWordOrSymbol<Rest>]
+          : // Check end for symbol
+            S extends `${infer Start}(`
+            ? [...ExtractWordOrSymbol<Start>, "("]
+            : S extends `${infer Start})`
+              ? [...ExtractWordOrSymbol<Start>, ")"]
+              : S extends `${infer Start},`
+                ? [...ExtractWordOrSymbol<Start>, ","]
+                : S extends `${infer Start}"`
+                  ? [...ExtractWordOrSymbol<Start>, '"']
+                  : S extends `${infer Start};`
+                    ? [...ExtractWordOrSymbol<Start>, ";"]
+                    : // No symbols found
+                      S extends ""
+                      ? []
+                      : [S];
 
 type SplitToWordsAndSymbols<S extends string> =
   S extends `${infer Word} ${infer Rest}`
@@ -35,7 +35,7 @@ type TrimString<S extends string> = S extends
   ? TrimString<Rest>
   : S;
 
-type TokenizeSqlString<S extends string> =
+export type TokenizeSqlString<S extends string> =
   S extends `${infer Line}\n${infer Rest}`
     ? [...SplitToWordsAndSymbols<TrimString<Line>>, ...TokenizeSqlString<Rest>]
     : SplitToWordsAndSymbols<TrimString<S>>;

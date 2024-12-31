@@ -1,8 +1,10 @@
-type RenameColumn<
+import { TableRecord } from "../state";
+
+export type RenameColumn<
   T extends TableRecord,
   Table extends string,
   OldCol extends string,
-  NewCol extends string
+  NewCol extends string,
 > = {
   [K in keyof T]: K extends Table
     ? {
