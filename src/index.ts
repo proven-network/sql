@@ -22,7 +22,7 @@ class TypedDatabase<Schema extends GeneratedSchema = { tables: {} }> {
 
   query<S extends string>(
     query: S
-  ): ParseQueryType<LexSqlTokens<TokenizeSqlString<S>>, Schema> {
+  ): Promise<ParseQueryType<LexSqlTokens<TokenizeSqlString<S>>, Schema>> {
     return [] as any;
   }
 }

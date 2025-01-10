@@ -26,4 +26,4 @@ const DB = getApplicationDb("main")
     `ALTER TABLE posts ADD COLUMN updated_at INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP;`
   );
 
-const rows = DB.query("SELECT * FROM posts");
+const rows = await DB.query("SELECT * FROM posts");
