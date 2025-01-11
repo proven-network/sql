@@ -10,8 +10,8 @@ class TypedDatabase<Schema extends GeneratedSchema = { tables: {} }> {
     this.name = name;
   }
 
-  execute(query: string): number {
-    return 0;
+  execute(query: string): Promise<number> {
+    return Promise.resolve(0);
   }
 
   migrate<S extends string>(
