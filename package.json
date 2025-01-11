@@ -1,7 +1,7 @@
 {
   "name": "@proven-network/sql",
   "description": "Access relational data inside Proven runtime",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "homepage": "https://proven.network",
   "main": "dist/proven-dapp-toolkit.mjs",
   "exports": {
@@ -32,8 +32,8 @@
     "elliptic": "6.6.1",
     "prettier": "3.4.2",
     "ts-node": "10.9.2",
-    "typescript": "5.7.2",
-    "vite": "6.0.6",
+    "typescript": "5.7.3",
+    "vite": "6.0.7",
     "vite-plugin-singlefile": "2.1.0"
   }
 }
