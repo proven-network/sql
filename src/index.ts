@@ -3,7 +3,7 @@ import { ParseMigration, ParseQueryType } from "./parser";
 import { GeneratedSchema } from "./state";
 import { TokenizeSqlString } from "./tokenizer";
 
-class TypedDatabase<Schema extends GeneratedSchema = { tables: {} }> {
+class Database<Schema extends GeneratedSchema = { tables: {} }> {
   name: string;
 
   constructor(name: string) {
@@ -16,7 +16,7 @@ class TypedDatabase<Schema extends GeneratedSchema = { tables: {} }> {
 
   migrate<S extends string>(
     query: S
-  ): TypedDatabase<ParseMigration<LexSqlTokens<TokenizeSqlString<S>>, Schema>> {
+  ): Database<ParseMigration<LexSqlTokens<TokenizeSqlString<S>>, Schema>> {
     return this;
   }
 
@@ -27,10 +27,44 @@ class TypedDatabase<Schema extends GeneratedSchema = { tables: {} }> {
   }
 }
 
-export function getApplicationDb(name: string): TypedDatabase {
-  return new TypedDatabase(name);
+export function getApplicationDb(name: string): Database {
+  return new Database(name);
 }
 
-export function getPersonalDb(name: string): TypedDatabase {
-  return new TypedDatabase(name);
+export function getPersonalDb(name: string): Database {
+  return new Database(name);
+}
+
+class NftDatabase<Schema extends GeneratedSchema = { tables: {} }> {
+  name: string;
+
+  constructor(name: string) {
+    this.name = name;
+  }
+
+  execute(
+    resourceAddress: string,
+    nftId: string | number | Uint8Array,
+    query: string
+  ): Promise<number> {
+    return Promise.resolve(0);
+  }
+
+  migrate<S extends string>(
+    query: S
+  ): NftDatabase<ParseMigration<LexSqlTokens<TokenizeSqlString<S>>, Schema>> {
+    return this;
+  }
+
+  query<S extends string>(
+    resourceAddress: string,
+    nftId: string | number | Uint8Array,
+    query: S
+  ): Promise<ParseQueryType<LexSqlTokens<TokenizeSqlString<S>>, Schema>> {
+    return [] as any;
+  }
+}
+
+export function getNftDb(name: string): NftDatabase {
+  return new NftDatabase(name);
 }

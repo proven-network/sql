@@ -59,3 +59,29 @@ export const handler = async () => {
   console.log(tasks);
 };
 ```
+
+### NFT Database
+
+```typescript
+import { getNftDb } from "@proven-network/sql";
+
+const NFT_DB = getPersonalDb("myPersonalDb").migrate(`
+    CREATE TABLE tasks (
+      id INTEGER PRIMARY KEY,
+      description TEXT NOT NULL,
+      completed BOOLEAN DEFAULT FALSE
+    );
+  `);
+const RESOURCE_ADDR = "resource_1qlq38wvrvh5m4kaz6etaac4389qtuycnp89atc8acdfi";
+
+export const handler = async (nftId: string) => {
+  const tasks = await NFT_DB.query(
+    RESOURCE_ADDR,
+    nftId,
+    `
+    SELECT * FROM tasks WHERE completed = FALSE
+  `
+  );
+  console.log(tasks);
+};
+```

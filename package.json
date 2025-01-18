@@ -1,7 +1,7 @@
 {
   "name": "@proven-network/sql",
   "description": "Access relational data inside Proven runtime",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "homepage": "https://proven.network",
   "main": "dist/proven-dapp-toolkit.mjs",
   "exports": {
