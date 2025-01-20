@@ -1,4 +1,4 @@
-import { getApplicationDb } from "./index";
+import { getApplicationDb, sql } from "./index";
 
 const DB = getApplicationDb("main")
   .migrate(
@@ -27,3 +27,7 @@ const DB = getApplicationDb("main")
   );
 
 const rows = await DB.query("SELECT * FROM posts");
+
+const rows2 = await DB.query(
+  sql("SELECT * FROM posts WHERE id = :id", { id: 1 })
+);
