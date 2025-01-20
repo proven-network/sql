@@ -241,7 +241,7 @@ export type ParseQueryType<
           [K in keyof ParseSelectColumns<Rest, Schema, State>]: ColumnToType<
             ParseSelectColumns<Rest, Schema, State>[K]
           >;
-        }[]
+        }
       : never
     : ParseQueryType<Rest, Schema, State>
   : never;

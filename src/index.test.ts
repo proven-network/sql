@@ -28,6 +28,17 @@ const DB = getApplicationDb("main")
 
 const rows = await DB.query("SELECT * FROM posts");
 
+const row = rows[0];
+
+for (const row of rows) {
+  console.log(row);
+}
+
+let mapped = rows.map((row) => row.title);
+let filtered = rows.filter((row) => row.title === "Hello");
+let length = rows.length;
+let columnNames = rows.columnNames;
+
 const rows2 = await DB.query(
   sql("SELECT * FROM posts WHERE id = :id", { id: 1 })
 );
