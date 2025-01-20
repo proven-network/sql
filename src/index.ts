@@ -9,10 +9,10 @@ class Sql<S extends string> {
 
   constructor(
     statement: S,
-    params: Record<string, null | number | string | Uint8Array> = {}
+    params?: Record<string, null | number | string | Uint8Array>
   ) {
     this.statement = statement;
-    this.params = params;
+    this.params = params || {};
   }
 }
 
