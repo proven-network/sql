@@ -35,7 +35,7 @@ class Database<Schema extends GeneratedSchema = { tables: {} }> {
   }
 
   migrate<S extends string>(
-    query: S | Sql<S>
+    query: S
   ): Database<ParseMigration<LexSqlTokens<TokenizeSqlString<S>>, Schema>> {
     return this;
   }
@@ -71,7 +71,7 @@ class NftDatabase<Schema extends GeneratedSchema = { tables: {} }> {
   }
 
   migrate<S extends string>(
-    query: S | Sql<S>
+    query: S
   ): NftDatabase<ParseMigration<LexSqlTokens<TokenizeSqlString<S>>, Schema>> {
     return this;
   }
