@@ -35,33 +35,29 @@ type FirstRow = FirstRowValue[];
 class Rows<T extends Record<string, null | number | string | Uint8Array>> {
   [index: number]: T | undefined;
   columnNames: Readonly<string[]>;
-  private rows: T[];
-  private rowStreamId: number;
 
-  get length(): number {
-    return this.rows.length;
+  get length(): Promise<number> {
+    return Promise.resolve(0);
   }
 
   constructor(firstRow: FirstRow, rowStreamId: number) {
     this.columnNames = [];
-    this.rows = [];
-    this.rowStreamId = rowStreamId;
   }
 
   [Symbol.iterator](): Iterator<T> {
-    return this.rows[Symbol.iterator]();
+    return [][Symbol.iterator]();
   }
 
   map<U>(callbackfn: (value: T, index: number, array: T[]) => U): U[] {
-    return this.rows.map(callbackfn);
+    return [].map(callbackfn);
   }
 
   filter(predicate: (value: T, index: number, array: T[]) => boolean): T[] {
-    return this.rows.filter(predicate);
+    return [].filter(predicate);
   }
 
   forEach(callbackfn: (value: T, index: number, array: T[]) => void): void {
-    this.rows.forEach(callbackfn);
+    [].forEach(callbackfn);
   }
 }
 
