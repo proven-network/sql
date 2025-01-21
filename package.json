@@ -1,18 +1,18 @@
 {
   "name": "@proven-network/sql",
   "description": "Access relational data inside Proven runtime",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "homepage": "https://proven.network",
-  "main": "dist/proven-dapp-toolkit.mjs",
+  "main": "dist/sql.mjs",
   "exports": {
     ".": {
       "import": {
         "types": "./types/index.d.ts",
-        "default": "./dist/proven-dapp-toolkit.mjs"
+        "default": "./dist/sql.mjs"
       },
       "require": {
         "types": "./types/index.d.ts",
-        "default": "./dist/proven-dapp-toolkit.umd.js"
+        "default": "./dist/sql.umd.js"
       }
     }
   },
